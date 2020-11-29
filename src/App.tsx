@@ -1,7 +1,11 @@
 import React from 'react';
 
-function App() {
-  return <div className="App"></div>;
-}
+import Router from './routes';
+import 'element-theme-default';
+import './styles/default.css';
+
+const App: React.FC = () => {
+  return <Router />;
+};
 
 export default App;
