@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 
-import { Input, Button, Layout } from 'element-react';
+import { Input, Button, Layout, Notification } from 'element-react';
+
+import Api from './../../services/api';
+import { login } from './../../services/auth';
 
 import './index.css';
 import logo from './../../assets/Logo-dark.png';
 
-const SingIn: React.FC = () => {
+const SingIn: React.FC = (props) => {
   const [username, setUsername] = useState<
     React.SyntheticEvent<HTMLInputElement>
   >();
@@ -13,17 +16,28 @@ const SingIn: React.FC = () => {
     React.SyntheticEvent<HTMLInputElement>
   >();
 
+  console.log(props);
+
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    console.log(username, password);
-  }, [password, username]);
-
-  const login = async () => {
+  const loginAuth = async () => {
     setLoading(true);
-    setTimeout(() => {
+    try {
+      const credentials = {
+        email: username,
+        password: password,
+      };
+      const { data } = await Api.post('login', credentials);
+      login(data.token);
+    } catch (error) {
+      Notification.warning({
+        title: 'Atenção',
+        message: error.response.data.errors[0].message,
+      });
+      console.log(error.response);
+    } finally {
       setLoading(false);
-    }, 2000);
+    }
   };
 
   return (
@@ -65,7 +79,7 @@ const SingIn: React.FC = () => {
               style={{ marginTop: 20 }}
               loading={loading}
               type="success"
-              onClick={login}
+              onClick={loginAuth}
             >
               Login
             </Button>
