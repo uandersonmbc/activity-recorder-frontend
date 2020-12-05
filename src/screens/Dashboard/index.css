@@ -1,0 +1,16 @@
+.table-week {
+  width: 100%;
+}
+
+.total-week {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.total-week span {
+  margin-top: 20px;
+  margin-right: 20px;
+  font-size: 16px;
+  font-weight: 600;
+}

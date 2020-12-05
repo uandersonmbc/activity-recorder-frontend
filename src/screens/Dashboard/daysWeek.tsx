@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import Moment from 'react-moment';
 
-import { Loading, Button } from 'element-react';
+import { Loading, Button, Dialog } from 'element-react';
 
+import { toHourString } from '../../utils/time';
 import Api from './../../services/api';
-import { hour } from './../../utils/dates';
-
+import { DayWeek } from './types';
 interface DaysWeekProps {
   date: string;
 }
@@ -13,8 +13,9 @@ interface DaysWeekProps {
 const DaysWeek: React.FC<DaysWeekProps> = ({ date }) => {
   const [dataDays, setDataDays] = useState([]);
   const [loadingModal, setLoadingModal] = useState(false);
+  const [modal, setModal] = useState<string>('');
 
-  const searchWorkeds = async (date: string) => {
+  const fetchWorkeds = async (date: string) => {
     setLoadingModal(true);
     const params = {
       start: date,
@@ -31,10 +32,7 @@ const DaysWeek: React.FC<DaysWeekProps> = ({ date }) => {
   };
 
   useEffect(() => {
-    searchWorkeds(date);
-    return () => {
-      console.log('desmontado');
-    };
+    fetchWorkeds(date);
   }, []);
 
   return (
@@ -65,8 +63,8 @@ const DaysWeek: React.FC<DaysWeekProps> = ({ date }) => {
           </tr>
         </thead>
         <tbody>
-          {dataDays.map((d: any) => (
-            <tr key={d}>
+          {dataDays.map((d: DayWeek) => (
+            <tr key={d.id}>
               <td>{d.activity}</td>
               <td>
                 <Moment locale="pt-br" format="HH:MM">
@@ -79,12 +77,22 @@ const DaysWeek: React.FC<DaysWeekProps> = ({ date }) => {
                 </Moment>
               </td>
               <td>{d.project}</td>
-              <td>{hour(d.hours)}</td>
+              <td>{toHourString(d.hours)}</td>
               <td align="center" width="150">
-                <Button type="primary" icon="edit" size="mini">
+                <Button
+                  type="primary"
+                  icon="edit"
+                  size="mini"
+                  onClick={() => setModal(d.id)}
+                >
                   editar
                 </Button>
-                <Button type="danger" icon="delete" size="mini">
+                <Button
+                  type="danger"
+                  icon="delete"
+                  size="mini"
+                  onClick={() => console.log(d.id)}
+                >
                   deletar
                 </Button>
               </td>
@@ -92,6 +100,16 @@ const DaysWeek: React.FC<DaysWeekProps> = ({ date }) => {
           ))}
         </tbody>
       </table>
+      <Dialog visible={modal !== ''}>
+        <Dialog.Body></Dialog.Body>
+        <Dialog.Footer className="dialog-footer">
+          <Button onClick={() => console.log('ok')}>Cancel</Button>
+          <Button type="primary" onClick={() => console.log('ok')}>
+            Confirm
+          </Button>
+        </Dialog.Footer>
+        s
+      </Dialog>
     </Loading>
   );
 };
