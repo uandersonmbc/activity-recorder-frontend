@@ -1,7 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Moment from 'react-moment';
 
-import { Layout, Menu, Table, Card, Loading, Tag } from 'element-react';
+import {
+  Layout,
+  Menu,
+  Table,
+  Card,
+  Loading,
+  Tag,
+  DatePicker,
+} from 'element-react';
 import moment from 'moment';
 
 import { toHourString, typesHours } from '../../utils/time';
@@ -15,85 +23,12 @@ const propsTable = {
   emptyText: 'Sem dados para mostar',
 };
 
-const columns = [
-  {
-    type: 'expand',
-    // eslint-disable-next-line
-    expandPannel: function (date: Week) {
-      return <DaysWeek date={date.dayWeek} />;
-    },
-  },
-  {
-    label: 'Dia',
-    prop: '',
-    width: 150,
-    // eslint-disable-next-line
-    render: (row: any) => (
-      <Moment locale="pt-br" format="ddd DD/MMM/YYYY">
-        {row.dayWeek}
-      </Moment>
-    ),
-  },
-  {
-    label: 'Entrada',
-    prop: 'start_date_timestamp',
-    width: 90,
-    // eslint-disable-next-line
-    render: (row: any) =>
-      row.start_date_timestamp && (
-        <Tag type="success">
-          <Moment locale="pt-br" format="HH:MM">
-            {row.start_date_timestamp}
-          </Moment>
-        </Tag>
-      ),
-  },
-  {
-    label: 'Saída',
-    prop: 'end_date_timestamp',
-    width: 90,
-    // eslint-disable-next-line
-    render: (row: any) =>
-      row.end_date_timestamp && (
-        <Tag type="danger">
-          <Moment locale="pt-br" format="HH:MM">
-            {row.end_date_timestamp}
-          </Moment>
-        </Tag>
-      ),
-  },
-
-  {
-    label: 'Pausas',
-    prop: '',
-    // eslint-disable-next-line
-    render: (row: any) => {
-      return (
-        <>
-          {typesHours('coffee', row.coffee)}
-          {typesHours('lunch', row.lunch)}
-          {typesHours('absent', row.absent)}
-        </>
-      );
-    },
-  },
-  {
-    label: 'Total trabalhado ',
-    align: 'right',
-    prop: '',
-    width: 150,
-    // eslint-disable-next-line
-    render: (row: any) => {
-      return row.total && <Tag>{toHourString(row.total)}</Tag>;
-    },
-  },
-];
-
 const Dashboard: React.FC = () => {
   const [user, setUser] = useState<{ name: string; email: string }>();
   const [dataWeek, setDataWeek] = useState<Week[]>([]);
   const [weekTotal, setWeekTotal] = useState('00:00');
   const [loading, setLoading] = useState(false);
+  const [currentWeek, setCurrentWeek] = useState(moment().toISOString());
 
   async function getUser() {
     const { data } = await Api.get('user');
@@ -103,13 +38,14 @@ const Dashboard: React.FC = () => {
   async function createWeeks() {
     setLoading(true);
     try {
+      const init = moment(currentWeek);
       const params = {
-        start: moment().day(0).format('YYYY-MM-DD'),
-        end: moment().day(6).format('YYYY-MM-DD'),
+        start: init.day(0).format('YYYY-MM-DD'),
+        end: init.day(6).format('YYYY-MM-DD'),
       };
       const { data } = await Api.get('workedhours', { params });
-      const week: Week[] = [1, 2, 3, 4, 5, 6, 0].map((e) => {
-        const date = moment().day(e).format('YYYY-MM-DD');
+      const week: Week[] = [0, 1, 2, 3, 4, 5, 6].map((e) => {
+        const date = init.day(e).format('YYYY-MM-DD');
         const w = data.find(
           (w: Week) =>
             moment(w.start_date_timestamp).format('YYYY-MM-DD') === date,
@@ -138,8 +74,8 @@ const Dashboard: React.FC = () => {
   async function fetchWeekTotal() {
     try {
       const params = {
-        start: moment().day(0).format('YYYY-MM-DD'),
-        end: moment().day(6).format('YYYY-MM-DD'),
+        start: moment(currentWeek).day(0).format('YYYY-MM-DD'),
+        end: moment(currentWeek).day(6).format('YYYY-MM-DD'),
         weekTotal: true,
       };
       const { data } = await Api.get('workedhours', { params });
@@ -149,11 +85,86 @@ const Dashboard: React.FC = () => {
     }
   }
 
+  function updateDad() {
+    fetchWeekTotal();
+    createWeeks();
+  }
+
+  const columns = [
+    {
+      type: 'expand',
+      // eslint-disable-next-line
+      expandPannel: function (date: Week) {
+        return <DaysWeek date={date.dayWeek} updateDad={() => updateDad()} />;
+      },
+    },
+    {
+      label: 'Dia',
+      prop: '',
+      width: 150,
+      // eslint-disable-next-line
+      render: (row: any) => (
+        <Moment locale="pt-br" format="ddd DD/MMM/YYYY">
+          {row.dayWeek}
+        </Moment>
+      ),
+    },
+    {
+      label: 'Entrada',
+      prop: 'start_date_timestamp',
+      width: 90,
+      // eslint-disable-next-line
+      render: (row: any) =>
+        row.start_date_timestamp && (
+          <Tag type="success">
+            <Moment format="HH:mm">{row.start_date_timestamp}</Moment>
+          </Tag>
+        ),
+    },
+    {
+      label: 'Saída',
+      prop: 'end_date_timestamp',
+      width: 90,
+      // eslint-disable-next-line
+      render: (row: any) =>
+        row.end_date_timestamp && (
+          <Tag type="danger">
+            <Moment format="HH:mm">{row.end_date_timestamp}</Moment>
+          </Tag>
+        ),
+    },
+
+    {
+      label: 'Pausas',
+      prop: '',
+      // eslint-disable-next-line
+      render: (row: any) => {
+        return (
+          <>
+            {typesHours('coffee', row.coffee)}
+            {typesHours('lunch', row.lunch)}
+            {typesHours('absent', row.absent)}
+          </>
+        );
+      },
+    },
+    {
+      label: 'Total trabalhado ',
+      align: 'right',
+      prop: '',
+      width: 150,
+      // eslint-disable-next-line
+      render: (row: any) => {
+        return row.total && <Tag>{toHourString(row.total)}</Tag>;
+      },
+    },
+  ];
+
   useEffect(() => {
     getUser();
     createWeeks();
     fetchWeekTotal();
-  }, []);
+  }, [currentWeek]);
 
   return (
     <Loading loading={loading}>
@@ -183,6 +194,18 @@ const Dashboard: React.FC = () => {
             </Card>
           </Layout.Col>
           <Layout.Col span="20" xs="24" sm="20" md="20" lg="20">
+            <div className="center">
+              <DatePicker
+                value={currentWeek}
+                placeholder="Escolha a semana"
+                onChange={(date) => {
+                  setCurrentWeek(date);
+                  console.debug(date);
+                }}
+                format="dd/MM/yyyy"
+                selectionMode="week"
+              />
+            </div>
             <Table
               className="table-week"
               columns={columns}

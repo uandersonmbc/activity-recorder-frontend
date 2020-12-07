@@ -12,7 +12,7 @@ interface Hours {
 export function toHourString(hour: Hours): string {
   const h = hour.hours ? hour.hours : 0;
   const m = hour.minutes ? hour.minutes : 0;
-  return (h < 9 ? '0' + h : h) + ':' + (m < 9 ? '0' + m : m);
+  return (h <= 9 ? '0' + h : h) + ':' + (m <= 9 ? '0' + m : m);
 }
 
 export function typesHours(type: string, hours: Hours): React.ReactNode {

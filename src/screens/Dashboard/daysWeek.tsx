@@ -1,21 +1,39 @@
 import React, { useEffect, useState } from 'react';
 import Moment from 'react-moment';
 
-import { Loading, Button, Dialog } from 'element-react';
+import {
+  Loading,
+  Button,
+  Dialog,
+  TimeRangePicker,
+  Select,
+  Notification,
+  Popover,
+} from 'element-react';
 
 import { toHourString } from '../../utils/time';
 import Api from './../../services/api';
-import { DayWeek } from './types';
+import { DayWeek, Activity, Project } from './types';
 interface DaysWeekProps {
   date: string;
+  updateDad: () => void;
 }
 
-const DaysWeek: React.FC<DaysWeekProps> = ({ date }) => {
+const DaysWeek: React.FC<DaysWeekProps> = ({ date, updateDad }) => {
   const [dataDays, setDataDays] = useState([]);
   const [loadingModal, setLoadingModal] = useState(false);
-  const [modal, setModal] = useState<string>('');
+  const [modal, setModal] = useState<boolean>(false);
+  const [popover, setPopover] = useState<boolean>(false);
 
-  const fetchWorkeds = async (date: string) => {
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+
+  const [editDay, setEditDay] = useState('');
+  const [initEnd, setInitEnd] = useState<Date[]>([]);
+  const [activitySelect, setActivitySelect] = useState<number | null>();
+  const [projectSelect, setProjectSelect] = useState<number | null>();
+
+  async function fetchWorkeds(date: string) {
     setLoadingModal(true);
     const params = {
       start: date,
@@ -25,15 +43,123 @@ const DaysWeek: React.FC<DaysWeekProps> = ({ date }) => {
       const { data } = await Api.get('workedhours', { params });
       setDataDays(data);
     } catch (error) {
+      Notification.error({
+        title: '',
+        message: '',
+      });
       console.log(error);
     } finally {
       setLoadingModal(false);
     }
+  }
+
+  async function fetchProjects() {
+    setLoadingModal(true);
+
+    try {
+      const { data } = await Api.get('projects');
+      setProjects(data);
+    } catch (error) {
+      Notification.error({
+        title: '',
+        message: '',
+      });
+      console.log(error);
+    } finally {
+      setLoadingModal(false);
+    }
+  }
+  async function fetchActivities() {
+    setLoadingModal(true);
+
+    try {
+      const { data } = await Api.get('activities');
+      setActivities(data);
+    } catch (error) {
+      Notification.error({
+        title: '',
+        message: '',
+      });
+      console.log(error);
+    } finally {
+      setLoadingModal(false);
+    }
+  }
+
+  const edit = (id: string) => {
+    setEditDay(id);
+    const schedule: DayWeek[] = dataDays.filter((d: DayWeek) => d.id === id);
+    if (schedule) {
+      const ini = new Date(schedule[0].start);
+      const end = new Date(schedule[0].end);
+      setModal(true);
+      setActivitySelect(schedule[0].activity_id);
+      setProjectSelect(schedule[0].project_id);
+      setInitEnd([ini, end]);
+    }
+  };
+
+  const deleteActivity = async (id: string) => {
+    try {
+      const { data } = await Api.delete('workedhours/' + id);
+      Notification.success({
+        title: 'Uhuuuuu',
+        message: data.message,
+      });
+      updateDad();
+    } catch (error) {
+      Notification.error({
+        title: 'Houve um erro',
+        message: 'Não foi possível apagar',
+      });
+      console.log(error);
+    }
+  };
+
+  const cancel = () => {
+    setModal(false);
+    setActivitySelect(null);
+    setProjectSelect(null);
+    setInitEnd([]);
+  };
+
+  const save = async () => {
+    const time = {
+      project_id: projectSelect,
+      activity_id: activitySelect,
+      start: date + 'T' + initEnd[0].toISOString().split('T')[1],
+      end: date + 'T' + initEnd[1].toISOString().split('T')[1],
+    };
+    try {
+      if (editDay !== '') {
+        await Api.put('workedhours/' + editDay, time);
+      } else {
+        await Api.post('workedhours', time);
+      }
+      Notification.success({
+        title: 'Uhuuuu',
+        message: 'Suas horas foram salvas',
+      });
+      fetchWorkeds(date);
+      updateDad();
+    } catch (error) {
+      console.log(error.response.data.errors);
+      Notification.error({
+        title: 'Erro ao salvar os dados',
+        message: 'Os campos não foram preenchidos corretamente',
+      });
+    }
   };
 
   useEffect(() => {
+    fetchActivities();
+    fetchProjects();
     fetchWorkeds(date);
   }, []);
+
+  useEffect(() => {
+    console.log(initEnd);
+  }, [initEnd, activitySelect, projects]);
 
   return (
     <Loading loading={loadingModal}>
@@ -47,7 +173,12 @@ const DaysWeek: React.FC<DaysWeekProps> = ({ date }) => {
         <b>
           <Moment format="DD/MM/YYYY">{date}</Moment>
         </b>
-        <Button size="mini" type="success" icon="plus">
+        <Button
+          size="mini"
+          type="success"
+          icon="plus"
+          onClick={() => setModal(true)}
+        >
           Registrar Horas
         </Button>
       </div>
@@ -67,13 +198,13 @@ const DaysWeek: React.FC<DaysWeekProps> = ({ date }) => {
             <tr key={d.id}>
               <td>{d.activity}</td>
               <td>
-                <Moment locale="pt-br" format="HH:MM">
+                <Moment locale="pt-br" format="HH:mm">
                   {d.start}
                 </Moment>
               </td>
               <td>
-                <Moment locale="pt-br" format="HH:MM">
-                  {d.start}
+                <Moment locale="pt-br" format="HH:mm">
+                  {d.end}
                 </Moment>
               </td>
               <td>{d.project}</td>
@@ -83,32 +214,72 @@ const DaysWeek: React.FC<DaysWeekProps> = ({ date }) => {
                   type="primary"
                   icon="edit"
                   size="mini"
-                  onClick={() => setModal(d.id)}
+                  onClick={() => edit(d.id)}
                 >
                   editar
                 </Button>
-                <Button
-                  type="danger"
-                  icon="delete"
-                  size="mini"
-                  onClick={() => console.log(d.id)}
+
+                <Popover
+                  placement="top"
+                  width="160"
+                  trigger="click"
+                  content={
+                    <div>
+                      <p>Deseja apagar mesmo?</p>
+                      <div style={{ textAlign: 'right', margin: 0 }}>
+                        <Button
+                          type="primary"
+                          size="mini"
+                          onClick={() => deleteActivity(d.id)}
+                        >
+                          Sim
+                        </Button>
+                      </div>
+                    </div>
+                  }
                 >
-                  deletar
-                </Button>
+                  <Button
+                    type="danger"
+                    icon="delete"
+                    size="mini"
+                    onClick={() => console.log(d.id)}
+                  >
+                    deletar
+                  </Button>
+                </Popover>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-      <Dialog visible={modal !== ''}>
-        <Dialog.Body></Dialog.Body>
+      <Dialog visible={modal} onCancel={cancel}>
+        <Dialog.Body>
+          <TimeRangePicker
+            onChange={setInitEnd}
+            placeholder="Início - Fim"
+            value={initEnd}
+          />
+          <Select value={activitySelect} onChange={setActivitySelect}>
+            {activities.map((el: Activity) => {
+              return (
+                <Select.Option key={el.id} label={el.name} value={el.id} />
+              );
+            })}
+          </Select>
+          <Select value={projectSelect} onChange={setProjectSelect}>
+            {projects.map((el: Project) => {
+              return (
+                <Select.Option key={el.id} label={el.name} value={el.id} />
+              );
+            })}
+          </Select>
+        </Dialog.Body>
         <Dialog.Footer className="dialog-footer">
-          <Button onClick={() => console.log('ok')}>Cancel</Button>
-          <Button type="primary" onClick={() => console.log('ok')}>
-            Confirm
+          <Button onClick={cancel}>Cancelar</Button>
+          <Button type="primary" onClick={save}>
+            Salvar
           </Button>
         </Dialog.Footer>
-        s
       </Dialog>
     </Loading>
   );

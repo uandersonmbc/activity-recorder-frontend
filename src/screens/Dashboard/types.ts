@@ -22,6 +22,18 @@ export interface DayWeek {
   id: string;
   project: string;
   project_id: number;
-  type_id: number;
+  activity_id: number;
   start: string;
+}
+
+export interface Project {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface Activity {
+  name: string;
+  id: string;
+  slug: string;
 }
