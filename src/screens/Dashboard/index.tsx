@@ -1,21 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import Moment from 'react-moment';
 
-import {
-  Layout,
-  Menu,
-  Table,
-  Card,
-  Loading,
-  Tag,
-  DatePicker,
-} from 'element-react';
+import { Table, Loading, Tag, DatePicker } from 'element-react';
 import moment from 'moment';
 
+import { Week } from '../../models/types';
 import { toHourString, typesHours } from '../../utils/time';
 import Api from './../../services/api';
 import DaysWeek from './daysWeek';
-import { Week } from './types';
 
 import './index.css';
 
@@ -29,11 +21,6 @@ const Dashboard: React.FC = () => {
   const [weekTotal, setWeekTotal] = useState('00:00');
   const [loading, setLoading] = useState(false);
   const [currentWeek, setCurrentWeek] = useState(moment().toISOString());
-
-  async function getUser() {
-    const { data } = await Api.get('user');
-    setUser(data);
-  }
 
   async function createWeeks() {
     setLoading(true);
@@ -161,62 +148,32 @@ const Dashboard: React.FC = () => {
   ];
 
   useEffect(() => {
-    getUser();
     createWeeks();
     fetchWeekTotal();
   }, [currentWeek]);
 
   return (
     <Loading loading={loading}>
-      <Menu
-        theme="dark"
-        defaultActive="1"
-        className="el-menu-demo"
-        mode="horizontal"
-        onSelect={(e) => console.log(e)}
-      >
-        <Menu.Item index="dashboard">Dashboard</Menu.Item>
-        <Menu.Item index="report">Relatórios</Menu.Item>
-      </Menu>
-      <div style={{ padding: 20 }}>
-        <Layout.Row gutter="10">
-          <Layout.Col span="4" xs="24" sm="4" md="4" lg="4">
-            <Card bodyStyle={{ padding: 0, width: '100%' }}>
-              <img
-                src="https://chat.criainovacao.com.br/avatar/uanderson.lima"
-                style={{ width: '100%' }}
-                alt=""
-              />
-              <div style={{ padding: 10 }}>
-                <span>Uanderson Nunes</span>
-                <p>{user?.email}</p>
-              </div>
-            </Card>
-          </Layout.Col>
-          <Layout.Col span="20" xs="24" sm="20" md="20" lg="20">
-            <div className="center">
-              <DatePicker
-                value={currentWeek}
-                placeholder="Escolha a semana"
-                onChange={(date) => {
-                  setCurrentWeek(date);
-                  console.debug(date);
-                }}
-                format="dd/MM/yyyy"
-                selectionMode="week"
-              />
-            </div>
-            <Table
-              className="table-week"
-              columns={columns}
-              data={dataWeek}
-              {...propsTable}
-            />
-            <div className="total-week">
-              <span>Total da semana: {weekTotal}</span>
-            </div>
-          </Layout.Col>
-        </Layout.Row>
+      <div className="center">
+        <DatePicker
+          value={currentWeek}
+          placeholder="Escolha a semana"
+          onChange={(date) => {
+            setCurrentWeek(date);
+            console.debug(date);
+          }}
+          format="dd/MM/yyyy"
+          selectionMode="week"
+        />
+      </div>
+      <Table
+        className="table-week"
+        columns={columns}
+        data={dataWeek}
+        {...propsTable}
+      />
+      <div className="total-week">
+        <span>Total da semana: {weekTotal}</span>
       </div>
     </Loading>
   );

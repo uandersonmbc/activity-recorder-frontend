@@ -11,9 +11,9 @@ import {
   Popover,
 } from 'element-react';
 
+import { DayWeek, Activity, Project } from '../../models/types';
 import { toHourString } from '../../utils/time';
 import Api from './../../services/api';
-import { DayWeek, Activity, Project } from './types';
 interface DaysWeekProps {
   date: string;
   updateDad: () => void;

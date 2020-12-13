@@ -1,8 +1,7 @@
 import React from 'react';
-import { BrowserRouter, Route } from 'react-router-dom';
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
 
-import Dashboard from '../screens/Dashboard';
-import Reports from '../screens/Reports';
+import Main from '../screens/Main';
 import SingIn from '../screens/SingIn';
 
 const Routes: React.FC = () => {
@@ -12,12 +11,8 @@ const Routes: React.FC = () => {
         <SingIn />
       </Route>
 
-      <Route path="/dashboard">
-        <Dashboard />
-      </Route>
-
-      <Route path="/reports">
-        <Reports />
+      <Route path="/">
+        <Main />
       </Route>
     </BrowserRouter>
   );
