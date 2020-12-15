@@ -4,7 +4,7 @@ import Moment from 'react-moment';
 import { Table, Loading, Tag, DatePicker } from 'element-react';
 import moment from 'moment';
 
-import { Week } from '../../models/types';
+import { Week, Hour } from '../../models/types';
 import { toHourString, typesHours } from '../../utils/time';
 import Api from './../../services/api';
 import DaysWeek from './daysWeek';
@@ -21,6 +21,7 @@ const Dashboard: React.FC = () => {
   const [weekTotal, setWeekTotal] = useState('00:00');
   const [loading, setLoading] = useState(false);
   const [currentWeek, setCurrentWeek] = useState(moment().toISOString());
+  const [totalMonth, setTotalMonth] = useState<Hour>();
 
   async function createWeeks() {
     setLoading(true);
@@ -68,13 +69,25 @@ const Dashboard: React.FC = () => {
       const { data } = await Api.get('workedhours', { params });
       setWeekTotal(toHourString(data[0].total));
     } catch (error) {
-      console.log(error);
+      setWeekTotal('00:00');
     }
   }
 
   function updateDad() {
     fetchWeekTotal();
     createWeeks();
+  }
+
+  async function getTotalMonth() {
+    const params = {
+      month: '2020-12',
+    };
+    try {
+      const { data } = await Api.get('reports', { params });
+      setTotalMonth(data[0].total);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   const columns = [
@@ -150,11 +163,12 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     createWeeks();
     fetchWeekTotal();
+    getTotalMonth();
   }, [currentWeek]);
 
   return (
     <Loading loading={loading}>
-      <div className="center">
+      <div className="between">
         <DatePicker
           value={currentWeek}
           placeholder="Escolha a semana"
@@ -165,6 +179,9 @@ const Dashboard: React.FC = () => {
           format="dd/MM/yyyy"
           selectionMode="week"
         />
+        <div>
+          Total do mês <Tag>{totalMonth && toHourString(totalMonth)}</Tag>
+        </div>
       </div>
       <Table
         className="table-week"

@@ -11,6 +11,7 @@
     "@types/node": "^12.0.0",
     "@types/react": "^16.9.53",
     "@types/react-dom": "^16.9.8",
+    "apexcharts": "^3.23.0",
     "axios": "^0.21.0",
     "element-react": "^1.4.34",
     "element-theme-default": "^1.4.13",

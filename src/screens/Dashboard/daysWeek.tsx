@@ -255,7 +255,10 @@ const DaysWeek: React.FC<DaysWeekProps> = ({ date, updateDad }) => {
       <Dialog visible={modal} onCancel={cancel}>
         <Dialog.Body>
           <TimeRangePicker
-            onChange={setInitEnd}
+            onChange={(e) => {
+              setInitEnd(e);
+              console.log(e);
+            }}
             placeholder="Início - Fim"
             value={initEnd}
           />

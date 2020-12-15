@@ -35,6 +35,7 @@ const Main: React.FC = () => {
       setLoading(false);
     }
   }
+
   useEffect(() => {
     getUser();
     history.push('dashboard');
@@ -49,7 +50,7 @@ const Main: React.FC = () => {
         onSelect={(e) => e && history.push(e)}
       >
         <Menu.Item index="dashboard">Dashboard</Menu.Item>
-        <Menu.Item index="report">Relatórios</Menu.Item>
+        <Menu.Item index="report">Relatório</Menu.Item>
         <Menu.Item index="pdf">PDF</Menu.Item>
       </Menu>
       <div style={{ padding: 20 }}>
@@ -73,7 +74,7 @@ const Main: React.FC = () => {
                 <Dashboard />
               </Route>
 
-              <Route path="/reports">
+              <Route path="/report">
                 <Reports />
               </Route>
 

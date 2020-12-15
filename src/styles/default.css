@@ -1,6 +1,20 @@
-*{
+* {
   padding: 0;
   margin: 0;
   box-sizing: 0;
   font-family: sans-serif;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.between {
+  display: flex;
+  justify-content: space-between;
+  align-items: space-between;
+  width: 100%;
 }

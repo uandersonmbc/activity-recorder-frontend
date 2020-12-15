@@ -6,25 +6,18 @@
   align-items: center;
 }
 
-.center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-}
-
-.form-body{
+.form-body {
   width: 300px;
 }
 
-.form-input{
+.form-input {
   margin-top: 20px;
 }
 
-.form-button{
+.form-button {
   width: 100%;
 }
 
-.form-image{
+.form-image {
   width: 100%;
 }

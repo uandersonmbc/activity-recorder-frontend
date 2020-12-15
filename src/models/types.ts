@@ -9,7 +9,7 @@ export interface Week {
   end_date_timestamp: string;
 }
 
-interface Hour {
+export interface Hour {
   hours: number;
   minutes: number;
   seconds: number;
