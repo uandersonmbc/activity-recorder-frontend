@@ -1,3 +1,5 @@
+import { inflate } from 'zlib';
+
 export interface Week {
   dayWeek: string;
   pause: Hour;
@@ -36,4 +38,20 @@ export interface Activity {
   name: string;
   id: string;
   slug: string;
+}
+
+export interface ReportsProject {
+  name: string;
+  slug: string;
+  total: Hour;
+}
+export interface ReportsYear {
+  day?: string;
+  month?: string;
+  total: Hour;
+}
+export interface ReportsActivity {
+  name: string;
+  slug: string;
+  total: Hour;
 }

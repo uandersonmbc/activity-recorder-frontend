@@ -16,8 +16,6 @@ const SingIn: React.FC = (props) => {
     React.SyntheticEvent<HTMLInputElement>
   >();
 
-  console.log(props);
-
   const [loading, setLoading] = useState(false);
 
   const loginAuth = async () => {
