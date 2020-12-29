@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { Radio } from 'element-react';
+import { DatePicker, Loading, Radio } from 'element-react';
 import moment from 'moment';
 import { stringify } from 'querystring';
 
@@ -34,7 +34,7 @@ const Reports: React.FC = () => {
       setDataProjects(data[1].data);
       setDataActivities(data[2].data);
     } catch (error) {
-      console.log(error);
+      // alguma alguma coisa
     } finally {
       setLoading(false);
     }
@@ -51,7 +51,6 @@ const Reports: React.FC = () => {
         value: 0,
       });
     }
-    console.log(dias);
     setBarData(dias);
     getData();
   }, [info]);
@@ -73,41 +72,55 @@ const Reports: React.FC = () => {
   return (
     <div>
       <div>
-        <Radio.Group value={info} onChange={(e: string) => setInfo(e)}>
+        <Radio.Group
+          value={info}
+          onChange={(e: string) => setInfo(e)}
+          style={{ marginRight: 20 }}
+        >
           <Radio.Button value="month">Mês</Radio.Button>
           <Radio.Button value="year">Ano</Radio.Button>
         </Radio.Group>
+        <DatePicker
+          value={new Date()}
+          placeholder="Pick a month"
+          onChange={(date) => {
+            console.debug('month DatePicker changed: ', date);
+          }}
+          selectionMode="month"
+        />
       </div>
-      <ColumnCharts
-        data={barData.map((m) => m.value)}
-        labels={
-          info === 'month'
-            ? barData.map((m) => m.day)
-            : [
-                'jan',
-                'fev',
-                'mar',
-                'abr',
-                'mai',
-                'jun',
-                'jul',
-                'ago',
-                'set',
-                'out',
-                'nov',
-                'dez',
-              ]
-        }
-        potential={[]}
-      />
-      <PieCharts
-        data={dataProjects.map((m) => m.total.hours)}
-        labels={dataProjects.map((m) => m.name)}
-      />
-      <PieCharts
-        data={dataActivities.map((m) => m.total.hours)}
-        labels={dataActivities.map((m) => m.name)}
-      />
+      <Loading loading={loading}>
+        <ColumnCharts
+          data={barData.map((m) => m.value)}
+          labels={
+            info === 'month'
+              ? barData.map((m) => m.day)
+              : [
+                  'jan',
+                  'fev',
+                  'mar',
+                  'abr',
+                  'mai',
+                  'jun',
+                  'jul',
+                  'ago',
+                  'set',
+                  'out',
+                  'nov',
+                  'dez',
+                ]
+          }
+          potential={[]}
+        />
+        <PieCharts
+          data={dataProjects.map((m) => m.total.hours)}
+          labels={dataProjects.map((m) => m.name)}
+        />
+        <PieCharts
+          data={dataActivities.map((m) => m.total.hours)}
+          labels={dataActivities.map((m) => m.name)}
+        />
+      </Loading>
     </div>
   );
 };
